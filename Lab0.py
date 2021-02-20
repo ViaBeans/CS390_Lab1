@@ -62,6 +62,12 @@ class NeuralNetwork_2Layer():
                     L1out, L2out = self.__forward(x_batches[j])
                     L2error = L2out - y_batches[j]
                     L2delta = L2error * self.__sigmoidDerivative(L2out)
+                    L1error = np.dot(L2delta, self.W2.T)
+                    L1delta = L1error * self.__sigmoidDerivative(L1out)
+                    self.W1 -= x_batches[j].T.dot(L1delta) * \
+                        self.lr * math.exp(-0.1 * i)
+                    self.W2 -= L1out.T.dot(L2delta) * \
+                        self.lr * math.exp(-0.1 * i)
 
     # Forward pass.
 
