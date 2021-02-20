@@ -1,11 +1,12 @@
 
 import os
+import random
+
 import numpy as np
+import math
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.utils import to_categorical
-import random
-
 
 # Setting random seeds to keep everything deterministic.
 random.seed(1618)
@@ -22,8 +23,8 @@ NUM_CLASSES = 10
 IMAGE_SIZE = 784
 
 # Use these to set the algorithm to use.
-ALGORITHM = "guesser"
-#ALGORITHM = "custom_net"
+#ALGORITHM = "guesser"
+ALGORITHM = "custom_net"
 #ALGORITHM = "tf_net"
 
 
@@ -55,12 +56,8 @@ class NeuralNetwork_2Layer():
         x_batches = self.__batchGenerator(xVals, mbs)
         y_batches = self.__batchGenerator(yVals, mbs)
         batches_len = len(x_batches)
-        for i in epochs:
-            for j in batches_len:
-                pass
-        pass
-
     # Forward pass.
+
     def __forward(self, input):
         layer1 = self.__sigmoid(np.dot(input, self.W1))
         layer2 = self.__sigmoid(np.dot(layer1, self.W2))
@@ -95,8 +92,11 @@ def getRawData():
 
 
 def preprocessData(raw):
-    # TODO: Add range reduction here (0-255 ==> 0.0-1.0).
     ((xTrain, yTrain), (xTest, yTest)) = raw
+    xTrain = xTrain.reshape((xTrain.shape[0], -1))
+    xTest = xTest.reshape((xTest.shape[0], -1))
+    xTrain = xTrain / 255.0
+    xTest = xTest / 255.0
     yTrainP = to_categorical(yTrain, NUM_CLASSES)
     yTestP = to_categorical(yTest, NUM_CLASSES)
     print("New shape of xTrain dataset: %s." % str(xTrain.shape))
@@ -112,9 +112,9 @@ def trainModel(data):
         return None   # Guesser has no model, as it is just guessing.
     elif ALGORITHM == "custom_net":
         print("Building and training Custom_NN.")
-        # TODO: Write code to build and train your custon neural net.
-        print("Not yet implemented.")
-        return None
+        customNet = NeuralNetwork_2Layer(IMAGE_SIZE, 10, 128)
+        customNet.train(xTrain, yTrain)
+        return customNet
     elif ALGORITHM == "tf_net":
         print("Building and training TF_NN.")
         # TODO: Write code to build and train your keras neural net.
@@ -129,14 +129,10 @@ def runModel(data, model):
         return guesserClassifier(data)
     elif ALGORITHM == "custom_net":
         print("Testing Custom_NN.")
-        # TODO: Write code to run your custon neural net.
-        print("Not yet implemented.")
-        return None
+        return model.predict(data)
     elif ALGORITHM == "tf_net":
         print("Testing TF_NN.")
-        # TODO: Write code to run your keras neural net.
-        print("Not yet implemented.")
-        return None
+        return model.predict(data)
     else:
         raise ValueError("Algorithm not recognized.")
 
