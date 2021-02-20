@@ -55,27 +55,29 @@ class NeuralNetwork_2Layer():
     def train(self, xVals, yVals, epochs=100000, minibatches=True, mbs=100):
         x_batches = self.__batchGenerator(xVals, mbs)
         y_batches = self.__batchGenerator(yVals, mbs)
-        batches_len = len(x_batches)
         for i in range(0, epochs):
             if minibatches is True:
-                for j in range(0, batches_len):
-                    L1out, L2out = self.__forward(x_batches[j])
-                    L2error = L2out - y_batches[j]
+                for x_b, y_b in zip(x_batches, y_batches):
+                    L1out, L2out = self.__forward(x_b)
+                    L2error = L2out - y_b
                     L2delta = L2error * self.__sigmoidDerivative(L2out)
                     L1error = np.dot(L2delta, self.W2.T)
                     L1delta = L1error * self.__sigmoidDerivative(L1out)
-                    self.W1 -= x_batches[j].T.dot(L1delta) * \
+                    self.W1 -= x_b.T.dot(L1delta) * \
                         self.lr * math.exp(-0.1 * i)
                     self.W2 -= L1out.T.dot(L2delta) * \
                         self.lr * math.exp(-0.1 * i)
             else:
-                L1out, L2out = self.__forward(xVals)
-                L2error = L2out - yVals
-                L2delta = L2error * self.__sigmoidDerivative(L2out)
-                L1error = np.dot(L2delta, self.W2.T)
-                L1delta = L1error * self.__sigmoidDerivative(L1out)
-                self.W1 -= xVals.T.dot(L1delta) * self.lr * math.exp(-0.1 * i)
-                self.W2 -= L1out.T.dot(L2delta) * self.lr * math.exp(-0.1 * i)
+                for img in range(0, xVals.shape[0]):
+                    L1out, L2out = self.__forward(xVals[[img], :])
+                    L2error = L2out - yVals[[img], :]
+                    L2delta = L2error * self.__sigmoidDerivative(L2out)
+                    L1error = np.dot(L2delta, self.W2.T)
+                    L1delta = L1error * self.__sigmoidDerivative(L1out)
+                    self.W1 -= xVals[[img], :].T.dot(L1delta) * \
+                        self.lr * math.exp(-0.1 * i)
+                    self.W2 -= L1out.T.dot(L2delta) * \
+                        self.lr * math.exp(-0.1 * i)
 
     # Forward pass.
 
@@ -133,7 +135,7 @@ def trainModel(data):
         return None   # Guesser has no model, as it is just guessing.
     elif ALGORITHM == "custom_net":
         print("Building and training Custom_NN.")
-        customNet = NeuralNetwork_2Layer(IMAGE_SIZE, 10, 128)
+        customNet = NeuralNetwork_2Layer(IMAGE_SIZE, 10, 512)
         customNet.train(xTrain, yTrain)
         return customNet
     elif ALGORITHM == "tf_net":
@@ -162,7 +164,7 @@ def evalResults(data, preds):  # TODO: Add F1 score confusion matrix here.
     xTest, yTest = data
     acc = 0
     for i in range(preds.shape[0]):
-        if np.array_equal(preds[i], yTest[i]):
+        if np.argmax(preds[i], 0) == np.argmax(yTest[i], 0):
             acc = acc + 1
     accuracy = acc / preds.shape[0]
     print("Classifier algorithm: %s" % ALGORITHM)
