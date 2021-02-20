@@ -68,6 +68,14 @@ class NeuralNetwork_2Layer():
                         self.lr * math.exp(-0.1 * i)
                     self.W2 -= L1out.T.dot(L2delta) * \
                         self.lr * math.exp(-0.1 * i)
+            else:
+                L1out, L2out = self.__forward(xVals)
+                L2error = L2out - yVals
+                L2delta = L2error * self.__sigmoidDerivative(L2out)
+                L1error = np.dot(L2delta, self.W2.T)
+                L1delta = L1error * self.__sigmoidDerivative(L1out)
+                self.W1 -= xVals.T.dot(L1delta) * self.lr * math.exp(-0.1 * i)
+                self.W2 -= L1out.T.dot(L2delta) * self.lr * math.exp(-0.1 * i)
 
     # Forward pass.
 
