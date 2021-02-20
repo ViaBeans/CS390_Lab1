@@ -56,6 +56,13 @@ class NeuralNetwork_2Layer():
         x_batches = self.__batchGenerator(xVals, mbs)
         y_batches = self.__batchGenerator(yVals, mbs)
         batches_len = len(x_batches)
+        for i in range(0, epochs):
+            if minibatches is True:
+                for j in range(0, batches_len):
+                    L1out, L2out = self.__forward(x_batches[j])
+                    L2error = L2out - y_batches[j]
+                    L2delta = L2error * self.__sigmoidDerivative(L2out)
+
     # Forward pass.
 
     def __forward(self, input):
