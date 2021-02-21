@@ -183,10 +183,18 @@ def evalResults(data, preds):  # TODO: Add F1 score confusion matrix here.
     conf_matrix[NUM_CLASSES+1][0] = "ColSum"
     conf_matrix[NUM_CLASSES+1][NUM_CLASSES+1] = np.sum(rowSum)
 
-    # conf_matrix[0][NUM_CLASSES+1] = "ColSum"
-    # conf_matrix[NUM_CLASSES+1][0] = "RowSum"
+    F1 = [[], []]
+    for i in range(0, NUM_CLASSES):
+        pres = conf_matrix[i+1][i+1]/rowSum[i+1]
+        rec = conf_matrix[i+1][i+1]/colSum[i+1]
+        F1[1].append(round(2/(pres**-1 * rec ** -1), 3))
+        F1[0].append(i)
+
     print('\n'.join(['\t'.join([str(cell) for cell in row])
                      for row in conf_matrix]))
+    print('\n'.join(['\t'.join([str(cell) for cell in row])
+                     for row in F1]))
+
     accuracy = acc / preds.shape[0]
     print("Classifier algorithm: %s" % ALGORITHM)
     print("Classifier accuracy: %f%%" % (accuracy * 100))
