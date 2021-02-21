@@ -24,8 +24,8 @@ IMAGE_SIZE = 784
 
 # Use these to set the algorithm to use.
 # ALGORITHM = "guesser"
-#ALGORITHM = "custom_net"
-ALGORITHM = "tf_net"
+ALGORITHM = "custom_net"
+#ALGORITHM = "tf_net"
 
 
 class NeuralNetwork_2Layer():
@@ -69,12 +69,12 @@ class NeuralNetwork_2Layer():
                         self.lr * math.exp(-0.1 * i)
             else:
                 for img in range(0, xVals.shape[0]):
-                    L1out, L2out = self.__forward(xVals[[img], :])
-                    L2error = L2out - yVals[[img], :]
+                    L1out, L2out = self.__forward(xVals[img])
+                    L2error = L2out - yVals[img]
                     L2delta = L2error * self.__sigmoidDerivative(L2out)
                     L1error = np.dot(L2delta, self.W2.T)
                     L1delta = L1error * self.__sigmoidDerivative(L1out)
-                    self.W1 -= xVals[[img], :].T.dot(L1delta) * \
+                    self.W1 -= xVals[img].T.dot(L1delta) * \
                         self.lr * math.exp(-0.1 * i)
                     self.W2 -= L1out.T.dot(L2delta) * \
                         self.lr * math.exp(-0.1 * i)
