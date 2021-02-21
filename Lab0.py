@@ -24,8 +24,8 @@ IMAGE_SIZE = 784
 
 # Use these to set the algorithm to use.
 # ALGORITHM = "guesser"
-ALGORITHM = "custom_net"
-# ALGORITHM = "tf_net"
+#ALGORITHM = "custom_net"
+ALGORITHM = "tf_net"
 
 
 class NeuralNetwork_2Layer():
@@ -135,14 +135,23 @@ def trainModel(data):
         return None   # Guesser has no model, as it is just guessing.
     elif ALGORITHM == "custom_net":
         print("Building and training Custom_NN.")
-        customNet = NeuralNetwork_2Layer(IMAGE_SIZE, 10, 512)
+        customNet = NeuralNetwork_2Layer(IMAGE_SIZE, 10, 128)
         customNet.train(xTrain, yTrain)
         return customNet
     elif ALGORITHM == "tf_net":
         print("Building and training TF_NN.")
-        # TODO: Write code to build and train your keras neural net.
-        print("Not yet implemented.")
-        return None
+        model = keras.Sequential()
+        model.add(tf.keras.layers.Dense(256, activation=tf.nn.leaky_relu))
+        model.add(tf.keras.layers.Dense(128, activation=tf.nn.leaky_relu))
+        model.add(tf.keras.layers.Dense(64, activation=tf.nn.leaky_relu))
+        model.add(tf.keras.layers.Dense(32, activation=tf.nn.leaky_relu))
+        model.add(tf.keras.layers.Dense(16, activation=tf.nn.leaky_relu))
+        model.add(tf.keras.layers.Dense(NUM_CLASSES, activation=tf.nn.softmax))
+        lt = keras.losses.categorical_crossentropy
+        model.compile(optimizer='adam',
+                      loss=lt, metrics=['accuracy'])
+        model.fit(xTrain, yTrain, epochs=10)
+        return model
     else:
         raise ValueError("Algorithm not recognized.")
 
@@ -170,7 +179,6 @@ def evalResults(data, preds):  # TODO: Add F1 score confusion matrix here.
         if pred == true:
             acc = acc + 1
         conf_matrix[pred+1][true+1] += 1
-    print(np.sum(conf_matrix, axis=1))
     rowSum = np.sum(conf_matrix, axis=1)
     colSum = np.sum(conf_matrix, axis=0)
     #conf_matrix[NUM_CLASSES+1, 1:] -= [i for i in range(0, )]
@@ -190,8 +198,10 @@ def evalResults(data, preds):  # TODO: Add F1 score confusion matrix here.
         F1[1].append(round(2/(pres**-1 * rec ** -1), 3))
         F1[0].append(i)
 
+    print()
     print('\n'.join(['\t'.join([str(cell) for cell in row])
                      for row in conf_matrix]))
+    print()
     print('\n'.join(['\t'.join([str(cell) for cell in row])
                      for row in F1]))
 
