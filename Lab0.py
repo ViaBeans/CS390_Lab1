@@ -23,9 +23,9 @@ NUM_CLASSES = 10
 IMAGE_SIZE = 784
 
 # Use these to set the algorithm to use.
-#ALGORITHM = "guesser"
+# ALGORITHM = "guesser"
 ALGORITHM = "custom_net"
-#ALGORITHM = "tf_net"
+# ALGORITHM = "tf_net"
 
 
 class NeuralNetwork_2Layer():
@@ -162,10 +162,31 @@ def runModel(data, model):
 
 def evalResults(data, preds):  # TODO: Add F1 score confusion matrix here.
     xTest, yTest = data
+    conf_matrix = np.zeros((NUM_CLASSES+2, NUM_CLASSES+2))
     acc = 0
     for i in range(preds.shape[0]):
-        if np.argmax(preds[i], 0) == np.argmax(yTest[i], 0):
+        pred = np.argmax(preds[i])
+        true = np.argmax(yTest[i])
+        if pred == true:
             acc = acc + 1
+        conf_matrix[pred+1][true+1] += 1
+    print(np.sum(conf_matrix, axis=1))
+    rowSum = np.sum(conf_matrix, axis=1)
+    colSum = np.sum(conf_matrix, axis=0)
+    #conf_matrix[NUM_CLASSES+1, 1:] -= [i for i in range(0, )]
+    conf_matrix = conf_matrix.tolist()
+    conf_matrix[0] = ["TL/PL", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "RowSum"]
+    for i in range(1, NUM_CLASSES+2):
+        conf_matrix[i][0] = i-1
+        conf_matrix[i][NUM_CLASSES+1] = rowSum[i]
+        conf_matrix[NUM_CLASSES+1][i] = colSum[i]
+    conf_matrix[NUM_CLASSES+1][0] = "ColSum"
+    conf_matrix[NUM_CLASSES+1][NUM_CLASSES+1] = np.sum(rowSum)
+
+    # conf_matrix[0][NUM_CLASSES+1] = "ColSum"
+    # conf_matrix[NUM_CLASSES+1][0] = "RowSum"
+    print('\n'.join(['\t'.join([str(cell) for cell in row])
+                     for row in conf_matrix]))
     accuracy = acc / preds.shape[0]
     print("Classifier algorithm: %s" % ALGORITHM)
     print("Classifier accuracy: %f%%" % (accuracy * 100))
